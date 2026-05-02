@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings - Connect</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#3de273",
+                        "on-background": "#151e16",
+                        "tertiary-container": "#ffa07e",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#ffdbcf",
+                        "on-primary-fixed-variant": "#005322",
+                        "inverse-surface": "#2a332a",
+                        "surface-container-low": "#edf6e9",
+                        "background": "#f3fcef",
+                        "surface-tint": "#006d2f",
+                        "surface-bright": "#f3fcef",
+                        "surface-container": "#e7f1e4",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "on-primary-fixed": "#002109",
+                        "on-secondary-container": "#fefcff",
+                        "primary-container": "#25d366",
+                        "tertiary-fixed-dim": "#ffb59b",
+                        "on-secondary-fixed": "#00174b",
+                        "surface-container-high": "#e2ebde",
+                        "surface-container-highest": "#dce5d8",
+                        "surface-dim": "#d3ddd0",
+                        "secondary-container": "#316bf3",
+                        "primary-fixed": "#66ff8e",
+                        "on-surface-variant": "#3c4a3d",
+                        "inverse-primary": "#3de273",
+                        "on-tertiary-fixed": "#380d00",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "inverse-on-surface": "#eaf3e6",
+                        "surface-variant": "#dce5d8",
+                        "on-tertiary-container": "#78351b",
+                        "on-error-container": "#93000a",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#93492e",
+                        "on-surface": "#151e16",
+                        "secondary": "#0051d5",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "outline": "#6c7b6b",
+                        "primary": "#006d2f",
+                        "outline-variant": "#bbcbb9",
+                        "on-tertiary-fixed-variant": "#763319",
+                        "error": "#ba1a1a",
+                        "surface": "#f3fcef",
+                        "on-primary-container": "#005523",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#dbe1ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "bubble-gap-same": "0.125rem",
+                        "bubble-gap-different": "0.75rem",
+                        "avatar-size-md": "3.5rem",
+                        "avatar-size-sm": "2.5rem",
+                        "container-padding": "1rem",
+                        "gutter": "1rem"
+                    },
+                    "fontFamily": {
+                        "timestamp": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "label-caps": ["Inter", "sans-serif"],
+                        "h1": ["Inter", "sans-serif"],
+                        "h2": ["Inter", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "timestamp": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "h1": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "h2": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        /* Utility to hide scrollbar for clean UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen font-sans antialiased pb-24 pt-20 selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar JSON Translation -->
+<header class="flex justify-between items-center px-4 py-3 w-full fixed top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm border-b border-slate-100 dark:border-slate-800">
+<button class="text-emerald-600 dark:text-emerald-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors active:scale-95 transition-transform duration-150 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">chat_bubble</span>
+</button>
+<h1 class="font-sans text-lg font-semibold tracking-tight text-emerald-600 dark:text-emerald-400">Connect</h1>
+<button class="text-emerald-600 dark:text-emerald-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors active:scale-95 transition-transform duration-150 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">search</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="max-w-3xl mx-auto px-container-padding flex flex-col gap-6">
+<!-- Profile Header Bento Card -->
+<section class="bg-surface-container-lowest rounded-xl p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-outline-variant/40 flex items-center gap-4 relative overflow-hidden group hover:border-primary/30 transition-colors cursor-pointer">
+<!-- Decorative background blob -->
+<div class="absolute -right-8 -top-8 w-32 h-32 bg-primary-container/20 rounded-full blur-2xl pointer-events-none"></div>
+<div class="relative">
+<img class="w-20 h-20 rounded-full object-cover border-4 border-surface shadow-sm" data-alt="A modern, professional headshot of a person looking friendly, suitable for a chat app avatar. The lighting is soft and flattering, with a bright, clean, light-mode background. The overall aesthetic is trustworthy and vibrant, aligning with a premium corporate messaging platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaMuzFl0Q9iH84P_XGoFhNkc-MxvfRprBqP4DKFeYdePL9I-IhH44K4B8VcPkIla8BKlAw2q5ktOS989IzUNndjBcbp1UDvgUNWLXEnnV5aDCJqxUlysR3EFzgFJoIBXXvjcVt5UuUTbZNHdiWDXhxkik1X7hadRAMbqvCpeGSSohbPe9m7RpdbSoExu_GK0XZqQdaS4EaN3ZX06RiKmR4BAZE3tNL-4j4AywXLnEOfJXI17qd7bQiktEHbM-S1cjqAxARyKEMgp0"/>
+<!-- Status Indicator -->
+<div class="absolute bottom-0 right-0 w-5 h-5 bg-[#22C55E] rounded-full border-2 border-surface-container-lowest"></div>
+</div>
+<div class="flex-1 z-10">
+<h2 class="font-h1 text-h1 text-on-surface mb-0.5">Alex Mercer</h2>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-1">Available • Battery saving mode</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary z-10 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">qr_code</span>
+</div>
+</section>
+<!-- Settings Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Account Card -->
+<button class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-outline-variant/30 flex items-start gap-4 text-left hover:bg-surface-container-low transition-colors group">
+<div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">key</span>
+</div>
+<div class="flex-1 pt-1">
+<h3 class="font-h2 text-h2 text-on-surface mb-1">Account</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Privacy, security, change number</p>
+</div>
+</button>
+<!-- Chats Card -->
+<button class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-outline-variant/30 flex items-start gap-4 text-left hover:bg-surface-container-low transition-colors group">
+<div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">chat</span>
+</div>
+<div class="flex-1 pt-1">
+<h3 class="font-h2 text-h2 text-on-surface mb-1">Chats</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Theme, wallpapers, chat history</p>
+</div>
+</button>
+<!-- Notifications Card -->
+<button class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-outline-variant/30 flex items-start gap-4 text-left hover:bg-surface-container-low transition-colors group">
+<div class="w-12 h-12 rounded-full bg-tertiary-container/20 flex items-center justify-center text-tertiary group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">notifications</span>
+</div>
+<div class="flex-1 pt-1">
+<h3 class="font-h2 text-h2 text-on-surface mb-1">Notifications</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Message, group &amp; call tones</p>
+</div>
+</button>
+<!-- Storage and Data Card -->
+<button class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-outline-variant/30 flex items-start gap-4 text-left hover:bg-surface-container-low transition-colors group">
+<div class="w-12 h-12 rounded-full bg-surface-variant/50 flex items-center justify-center text-on-surface-variant group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">data_usage</span>
+</div>
+<div class="flex-1 pt-1">
+<h3 class="font-h2 text-h2 text-on-surface mb-1">Storage and Data</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Network usage, auto-download</p>
+</div>
+</button>
+<!-- Help Card (Spans full width on mobile) -->
+<button class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-outline-variant/30 flex items-start gap-4 text-left hover:bg-surface-container-low transition-colors group md:col-span-2">
+<div class="w-12 h-12 rounded-full bg-surface-dim/40 flex items-center justify-center text-on-surface group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">help</span>
+</div>
+<div class="flex-1 pt-1 flex items-center justify-between">
+<div>
+<h3 class="font-h2 text-h2 text-on-surface mb-1">Help</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Help center, contact us, privacy policy</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</button>
+</div>
+<!-- Meta Actions -->
+<div class="flex justify-center mt-4">
+<button class="font-label-caps text-label-caps text-error hover:bg-error-container/20 px-6 py-3 rounded-full transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+                LOG OUT
+            </button>
+</div>
+</main>
+<!-- BottomNavBar JSON Translation -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe pt-2 h-16 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg shadow-[0_-2px_10px_rgba(0,0,0,0.05)] border-t border-slate-100 dark:border-slate-800 rounded-t-2xl md:hidden">
+<!-- Chats (Inactive) -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-500 dark:hover:text-emerald-300 tap-highlight-transparent active:opacity-80 transition-all w-16" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]">chat</span>
+<span class="text-[11px] font-bold font-sans uppercase tracking-wider">Chats</span>
+</a>
+<!-- Updates (Inactive) -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-500 dark:hover:text-emerald-300 tap-highlight-transparent active:opacity-80 transition-all w-16" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]">update</span>
+<span class="text-[11px] font-bold font-sans uppercase tracking-wider">Updates</span>
+</a>
+<!-- Calls (Inactive) -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-500 dark:hover:text-emerald-300 tap-highlight-transparent active:opacity-80 transition-all w-16" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]">call</span>
+<span class="text-[11px] font-bold font-sans uppercase tracking-wider">Calls</span>
+</a>
+<!-- Settings (Active Match) -->
+<a class="flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/20 rounded-xl px-3 py-1 tap-highlight-transparent active:opacity-80 transition-all w-16" href="#">
+<span class="material-symbols-outlined mb-1 text-[24px]" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="text-[11px] font-bold font-sans uppercase tracking-wider">Settings</span>
+</a>
+</nav>
+</body></html>
