@@ -1,7 +1,7 @@
-import { Search, MoreVertical, Phone, Video, ArrowLeft, Sparkles, X } from 'lucide-react';
+import { Search, MoreVertical, ArrowLeft, Sparkles, X } from 'lucide-react';
 import MessageBubble from './MessageBubble';
 import InputBar from './InputBar';
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, memo } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { analyzeMood } from '../utils/sentiment';
@@ -12,6 +12,27 @@ import ContactInfoPane from './ContactInfoPane';
 import { API_BASE_URL } from '../config';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+function getSmartReplies(lastMessage: string | undefined): string[] {
+  if (!lastMessage) return [];
+  const lowerMsg = lastMessage.toLowerCase();
+  
+  if (lowerMsg.includes('?')) {
+    if (lowerMsg.includes('how')) return ["I'm good, thanks!", "Doing great, you?", "Okay 👍"];
+    if (lowerMsg.includes('where') || lowerMsg.includes('when')) return ["I'm on my way", "Almost there", "I'll check"];
+    return ["I'll check", "Let me think", "Send details"];
+  }
+
+  if (lowerMsg.includes('hi') || lowerMsg.includes('hello') || lowerMsg.includes('hey')) {
+    return ["Hey there! 👋", "Hi! How are you?", "Okay 👍"];
+  }
+
+  if (lowerMsg.includes('thank')) {
+    return ["You're welcome! 😊", "No problem!", "Anytime!"];
+  }
+
+  return ["Okay 👍", "I'll check", "Send details"];
+}
 
 interface FileAttachment {
   name: string;
@@ -59,6 +80,8 @@ export default function ChatWindow({
   const [isTyping, setIsTyping] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<'ALL' | 'LINKS' | 'FILES' | 'IMPORTANT'>('ALL');
   const [showContactInfo, setShowContactInfo] = useState(false);
   const [activeWallpaper, setActiveWallpaper] = useState(localStorage.getItem('chatWallpaper') || "WhatsApp Doodle");
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -89,12 +112,21 @@ export default function ChatWindow({
     calm: 'bg-blue-400/20 dark:bg-blue-500/10'
   };
 
-  // ── Scroll to bottom when messages or typing state changes ───────────────
+  // ── Scroll to bottom — instant for history load, smooth for new messages ─
+  const isFirstLoad = useRef(true);
   useEffect(() => {
-    if (scrollRef.current) {
+    if (!scrollRef.current) return;
+    if (isFirstLoad.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      isFirstLoad.current = false;
+    } else {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }
   }, [messages, isTyping]);
+
+  useEffect(() => {
+    isFirstLoad.current = true;
+  }, [chatId]);
 
   // ── Load history from MongoDB when chat opens ─────────────────────────────
   useEffect(() => {
@@ -103,7 +135,7 @@ export default function ChatWindow({
     setIsTyping(false);
     setHistoryLoading(true);
 
-    fetch(`${API_BASE_URL}/messages/${userId}/${chatId}`, {
+    fetch(`${API_BASE_URL}/api/messages/${userId}/${chatId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.json())
@@ -209,6 +241,16 @@ export default function ChatWindow({
     (content: string, expiry: 'ONE_DAY' | 'SEVEN_DAYS' | 'NEVER' = 'NEVER') => {
       if (!content.trim() || !chatId) return;
 
+      // Update frequently contacted suggestion metric
+      try {
+        const counts = JSON.parse(localStorage.getItem('chatFrequency') || '{}');
+        counts[chatId] = (counts[chatId] || 0) + 1;
+        localStorage.setItem('chatFrequency', JSON.stringify(counts));
+        window.dispatchEvent(new Event('chatFrequencyUpdated'));
+      } catch (e) {
+        // ignore errors
+      }
+
       const tempId = crypto.randomUUID();
       const optimistic: Message = {
         id: tempId,
@@ -266,6 +308,18 @@ export default function ChatWindow({
     }, 2000);
   }, [socket, chatId, userId]);
 
+  // ── Auto Categorization Logic ─────────────────────────────────────────────
+  const displayedMessages = messages.filter(msg => {
+    if (activeFilter === 'ALL') return true;
+    if (activeFilter === 'LINKS') return msg.content.includes('http://') || msg.content.includes('https://');
+    if (activeFilter === 'FILES') return !!msg.file;
+    if (activeFilter === 'IMPORTANT') {
+      const l = msg.content.toLowerCase();
+      return l.includes('urgent') || l.includes('important') || l.includes('asap') || l.includes('deadline') || l.includes('alert') || l.includes('password');
+    }
+    return true;
+  });
+
   // ─────────────────────────────────────────────────────────────────────────
 
   if (!chatId) {
@@ -283,44 +337,81 @@ export default function ChatWindow({
     <div className="flex-1 flex h-full relative z-10 border-l border-gray-200 dark:border-gray-800 overflow-hidden">
       <div className={`flex-1 flex flex-col h-full bg-[#efeae2] dark:bg-[#0b141a] transition-all duration-300 ${showContactInfo ? 'hidden lg:flex' : 'flex'}`}>
         {/* ── Chat Header ──────────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between px-4 py-3 bg-[#f0f2f5] dark:bg-[#202c33] border-b border-gray-200 dark:border-gray-800 h-[60px] shadow-sm z-20">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setShowContactInfo(!showContactInfo)}>
+        <div className="flex items-center justify-between px-3 py-2.5 bg-white/95 dark:bg-[#202c33]/95 border-b border-gray-200/60 dark:border-gray-800/60 h-[60px] shadow-[0_1px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_8px_rgba(0,0,0,0.3)] z-20 no-select" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setShowContactInfo(!showContactInfo)}>
             <button
               onClick={(e) => { e.stopPropagation(); onBack(); }}
-            className="md:hidden p-1 -ml-2 text-gray-500 dark:text-[#aebac1] hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
-          >
-            <ArrowLeft size={24} />
-          </button>
-          <img src={`https://i.pravatar.cc/150?u=${chatId}`} alt="Chat" className="w-10 h-10 rounded-full object-cover" />
-          <div>
-            <h2 className="font-medium text-[16px] text-gray-900 dark:text-[#e9edef] leading-tight">{contactName}</h2>
-            <p className="text-[13px] text-gray-500 dark:text-[#8696a0]">
-              {isTyping ? (
-                <span className="text-[#25D366] animate-pulse">typing…</span>
-              ) : (
-                'online'
-              )}
-            </p>
+              className="md:hidden p-1.5 -ml-1 text-gray-500 dark:text-[#aebac1] hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-full transition-colors tap-scale"
+            >
+              <ArrowLeft size={22} />
+            </button>
+            <div className="relative">
+              <div className="w-9 h-9 rounded-full bg-[#00a884]/10 dark:bg-[#00a884]/20 flex items-center justify-center border border-[#00a884]/20 shadow-sm">
+                <span className="text-[14px] font-bold text-[#00a884] uppercase">{contactName?.charAt(0) || chatName?.charAt(0)}</span>
+              </div>
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#25d366] rounded-full border-2 border-white dark:border-[#202c33]" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-[15px] text-gray-900 dark:text-[#e9edef] leading-tight tracking-tight">{contactName}</h2>
+              <p className="text-[12px] text-gray-500 dark:text-[#8696a0] leading-none mt-0.5">
+                {isTyping ? (
+                  <span className="text-[#25D366] font-medium">typing…</span>
+                ) : 'online'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1 text-gray-500 dark:text-[#aebac1]">
+            <button
+              onClick={() => setShowSummaryModal(true)}
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors text-amber-500 dark:text-amber-400 tap-scale"
+              title="Summarize Chat"
+            >
+              <Sparkles size={19} />
+            </button>
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-2 rounded-full transition-colors tap-scale ${showFilters ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400' : 'hover:bg-gray-100 dark:hover:bg-gray-700/60'}`}
+            >
+              <Search size={19} />
+            </button>
+            <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors tap-scale">
+              <MoreVertical size={19} />
+            </button>
           </div>
         </div>
 
-        <div className="flex gap-4 text-gray-500 dark:text-[#aebac1]">
-          <button 
-            onClick={() => setShowSummaryModal(true)}
-            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-amber-500 dark:text-amber-400"
-            title="Summarize Chat"
-          >
-            <Sparkles size={20} />
-          </button>
-          <div className="w-[1px] h-6 bg-gray-300 dark:bg-gray-700 my-auto hidden sm:block mx-1" />
-          <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-            <Search size={20} />
-          </button>
-          <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-            <MoreVertical size={20} />
-          </button>
-        </div>
-      </div>
+        {/* ── Auto Categorize Filter Bar ──────────────────────────────────── */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="bg-white/95 dark:bg-[#202c33]/95 border-b border-gray-200/60 dark:border-gray-800/60 overflow-hidden z-10 shadow-sm"
+              style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+            >
+              <div className="flex gap-2 px-4 py-2 overflow-x-auto custom-scrollbar-x">
+                {(['ALL', 'LINKS', 'FILES', 'IMPORTANT'] as const).map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setActiveFilter(f)}
+                    className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[13px] font-medium transition-colors tap-scale ${
+                      activeFilter === f
+                        ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400'
+                        : 'bg-gray-100 dark:bg-[#182229] text-gray-600 dark:text-[#aebac1] hover:bg-gray-200 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {f === 'ALL' && 'All'}
+                    {f === 'LINKS' && '🔗 Links'}
+                    {f === 'FILES' && '📎 Files'}
+                    {f === 'IMPORTANT' && '⭐ Important'}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       {/* ── Message List ─────────────────────────────────────────────────── */}
       <div
@@ -353,21 +444,47 @@ export default function ChatWindow({
           </div>
         )}
 
-        {messages.map(msg => (
+        {displayedMessages.map(msg => (
           <MessageBubble key={msg.id} {...msg} />
         ))}
 
-        {/* Typing indicator bubble */}
+        {displayedMessages.length === 0 && activeFilter !== 'ALL' && (
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-sm text-gray-500 dark:text-[#8696a0] bg-white/80 dark:bg-[#202c33]/80 px-4 py-2 rounded-lg backdrop-blur-sm">
+              No {activeFilter.toLowerCase()} found in this chat.
+            </p>
+          </div>
+        )}
+
+        {/* Typing indicator — fluid CSS dots */}
         {isTyping && (
-          <div className="flex justify-start px-4 mb-2">
-            <div className="bg-white dark:bg-[#202c33] rounded-lg rounded-tl-none px-4 py-2.5 shadow-sm flex gap-1 items-center">
-              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0ms]" />
-              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
-              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
+          <div className="flex justify-start px-3 mb-1 fade-in">
+            <div
+              className="bg-white dark:bg-[#202c33] rounded-[18px] rounded-tl-[5px] px-4 py-3 shadow-sm flex gap-[5px] items-center"
+              style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.08)' }}
+            >
+              <span className="typing-dot" />
+              <span className="typing-dot" />
+              <span className="typing-dot" />
             </div>
           </div>
         )}
       </div>
+
+      {/* ── Smart Replies ─────────────────────────────────────────────────── */}
+      {messages.length > 0 && !messages[messages.length - 1].isOwn && (
+        <div className="flex gap-2 px-3 py-2 overflow-x-auto custom-scrollbar-x bg-[#efeae2] dark:bg-[#0b141a]">
+          {getSmartReplies(messages[messages.length - 1].content).map((reply, i) => (
+            <button
+              key={i}
+              onClick={() => handleSendMessage(reply)}
+              className="flex-shrink-0 px-4 py-1.5 bg-white dark:bg-[#202c33] text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 rounded-full text-[14px] font-medium shadow-sm hover:bg-emerald-50 dark:hover:bg-[#182229] transition-colors tap-scale fade-in"
+            >
+              {reply}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ── Input Bar ────────────────────────────────────────────────────── */}
       <InputBar onSendMessage={handleSendMessage} onSendFile={handleSendFile} onTyping={handleTyping} />

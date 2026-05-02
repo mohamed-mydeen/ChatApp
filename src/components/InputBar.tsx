@@ -1,4 +1,4 @@
-import { Smile, Paperclip, Mic, Send, X, Timer, Image as ImageIcon, FileText, User } from 'lucide-react';
+import { Smile, Paperclip, Mic, Send, X, Timer, Image as ImageIcon, FileText, User, Wand2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -214,6 +214,60 @@ export default function InputBar({
     });
   };
 
+  const handleImproveText = () => {
+    let improved = message.trim();
+    if (!improved) return;
+    
+    const replacements: Record<string, string> = {
+      'send me doc': 'Could you please send me the document?',
+      'send doc': 'Could you please send the document?',
+      'u': 'you',
+      'ur': 'your',
+      'r': 'are',
+      'pls': 'please',
+      'plz': 'please',
+      'idk': "I don't know",
+      'tbh': 'to be honest',
+      'imo': 'in my opinion',
+      'lmk': 'let me know',
+      'omw': 'on my way',
+      'np': 'no problem',
+      'ty': 'thank you',
+      'thx': 'thanks',
+      'brb': 'be right back',
+      'btw': 'by the way',
+      'afaik': 'as far as I know',
+      'gtg': 'got to go',
+      'im': "I'm",
+      'ive': "I've",
+      'dont': "don't",
+      'cant': "can't",
+      'wont': "won't",
+    };
+
+    // Replace whole words
+    Object.keys(replacements).forEach((key) => {
+      const regex = new RegExp(`\\b${key}\\b`, 'gi');
+      improved = improved.replace(regex, replacements[key]);
+    });
+
+    // Auto capitalize first letter
+    improved = improved.charAt(0).toUpperCase() + improved.slice(1);
+    
+    // Auto punctuation
+    if (!/[.!?]$/.test(improved)) {
+      const firstWord = improved.split(' ')[0].toLowerCase();
+      const questionWords = ['could', 'can', 'would', 'do', 'is', 'are', 'what', 'where', 'when', 'why', 'how'];
+      if (questionWords.includes(firstWord)) {
+         improved += '?';
+      } else {
+         improved += '.';
+      }
+    }
+
+    setMessage(improved);
+  };
+
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
@@ -311,7 +365,7 @@ export default function InputBar({
       </AnimatePresence>
 
       {/* ── Input Row ────────────────────────────────────────────────────── */}
-      <div className="flex items-end gap-2 px-3 pt-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))] bg-[#f0f2f5] dark:bg-[#202c33] w-full min-h-[60px]">
+      <div className="flex items-end gap-2 px-2 pt-2 pb-[calc(10px+env(safe-area-inset-bottom,0px))] bg-[#f0f2f5] dark:bg-[#202c33] w-full min-h-[60px]">
         {/* Left buttons */}
         <div className="flex gap-1 pb-1">
           <button
@@ -425,36 +479,47 @@ export default function InputBar({
           </div>
         </div>
 
-        {/* Textarea */}
-        <textarea
-          ref={textareaRef}
-          value={message}
-          onChange={e => { setMessage(e.target.value); onTyping?.(); }}
-          onKeyDown={handleKeyDown}
-          placeholder="Type a message"
-          rows={1}
-          className="flex-1 bg-white dark:bg-[#2a3942] text-gray-900 dark:text-[#e9edef] rounded-lg px-4 py-2.5 text-[15px] focus:outline-none placeholder-gray-500 dark:placeholder-[#8696a0] custom-scrollbar resize-none max-h-[120px]"
-        />
+        {/* Textarea — pill style */}
+        <div className="flex-1 relative flex items-end">
+          <textarea
+            ref={textareaRef}
+            value={message}
+            onChange={e => { setMessage(e.target.value); onTyping?.(); }}
+            onKeyDown={handleKeyDown}
+            placeholder="Message"
+            rows={1}
+            className={`w-full bg-white dark:bg-[#2a3942] text-gray-900 dark:text-[#e9edef] rounded-[24px] pl-4 ${message.trim() ? 'pr-12' : 'pr-4'} py-[9px] text-[15px] focus:outline-none placeholder-gray-400 dark:placeholder-[#8696a0] custom-scrollbar resize-none max-h-[120px] shadow-sm border border-gray-200/80 dark:border-gray-700/50 leading-[1.45] transition-shadow duration-150 focus:shadow-md`}
+            style={{ minHeight: 38 }}
+          />
+          {message.trim() && (
+            <button
+              onClick={handleImproveText}
+              className="absolute right-2 bottom-[7px] p-1.5 text-amber-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors tap-scale bg-amber-50 dark:bg-amber-900/20 rounded-full"
+              title="Improve message"
+            >
+              <Wand2 size={16} />
+            </button>
+          )}
+        </div>
 
         {/* Right button */}
-        <div className="pb-1">
+        <div className="pb-0.5 flex-shrink-0">
           {message.trim() || isListening ? (
-            <motion.button
-              whileTap={{ scale: 0.88 }}
+            <button
               onClick={isListening ? toggleListening : handleSend}
-              className={`p-2 text-white rounded-full transition-colors shadow-md ${
-                isListening ? 'bg-red-500 hover:bg-red-600 animate-pulse' : 'bg-emerald-500 hover:bg-emerald-600'
+              className={`w-10 h-10 flex items-center justify-center text-white rounded-full btn-ios send-glow transition-colors ${
+                isListening ? 'bg-red-500 animate-pulse' : 'bg-[#00a884]'
               }`}
             >
-              {isListening ? <Mic size={20} /> : <Send size={20} />}
-            </motion.button>
+              {isListening ? <Mic size={19} /> : <Send size={19} />}
+            </button>
           ) : (
-            <button 
+            <button
               onClick={toggleListening}
-              className="p-1.5 text-gray-500 dark:text-[#8696a0] hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
+              className="w-10 h-10 flex items-center justify-center text-gray-500 dark:text-[#8696a0] hover:text-[#00a884] dark:hover:text-[#00a884] transition-colors tap-scale rounded-full"
               title="Speak to type"
             >
-              <Mic size={24} />
+              <Mic size={22} />
             </button>
           )}
         </div>

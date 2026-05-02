@@ -44,11 +44,15 @@ export default function ContactInfoPane({ contactName, chatId, onClose }: Contac
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         {/* ── Profile Section ────────────────────────────────────────────── */}
         <div className="bg-white dark:bg-[#111b21] flex flex-col items-center py-8 shadow-sm">
-          <img 
-            src={`https://i.pravatar.cc/300?u=${chatId}`} 
-            alt="Profile" 
-            className="w-48 h-48 rounded-full object-cover shadow-md border-4 border-white dark:border-[#202c33]" 
-          />
+          {/* Initials avatar – no dummy image */}
+          <div
+            className="w-48 h-48 rounded-full flex items-center justify-center border-4 border-white dark:border-[#202c33] shadow-md"
+            style={{ background: '#00a884' }}
+          >
+            <span className="text-[64px] font-bold text-white uppercase select-none">
+              {contactName?.charAt(0)}
+            </span>
+          </div>
           <h2 className="mt-4 text-[22px] font-medium text-gray-900 dark:text-[#e9edef]">{contactName}</h2>
           <p className="text-[15px] text-gray-500 dark:text-[#8696a0] mt-1">Available</p>
         </div>

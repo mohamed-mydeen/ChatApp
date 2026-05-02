@@ -41,65 +41,55 @@ export default function BottomNavBar({
 }) {
   return (
     <div
-      className="fixed bottom-0 left-0 w-full z-50 md:hidden flex justify-center"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      id="bottom-nav-bar"
+      className="fixed bottom-0 left-0 w-full z-50 md:hidden bg-white/90 dark:bg-[#0b141a]/90 border-t border-gray-200/80 dark:border-gray-700/80 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]"
+      style={{ 
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)'
+      }}
     >
-      {/* Floating frosted-glass pill */}
-      <div
-        className="mx-4 mb-3 flex items-center justify-around rounded-[28px] overflow-hidden w-full max-w-sm"
-        style={{
-          background: 'rgba(18, 18, 20, 0.82)',
-          backdropFilter: 'blur(28px) saturate(160%)',
-          WebkitBackdropFilter: 'blur(28px) saturate(160%)',
-          boxShadow:
-            '0 12px 40px rgba(0,0,0,0.38), 0 1px 0 rgba(255,255,255,0.08) inset, 0 -1px 0 rgba(255,255,255,0.04) inset',
-        }}
-      >
+      <div className="flex items-center justify-around w-full h-[64px]">
         {TABS.map(tab => {
           const isActive = tab.id === currentTab;
-          const canPress = tab.id === 'chats' || tab.id === 'settings' || tab.id === 'status';
 
           return (
-            <motion.button
+            <button
               key={tab.id}
-              onClick={() => canPress && onTabChange(tab.id as TabId)}
-              disabled={!canPress}
-              whileTap={{ scale: 0.82 }}
-              transition={{ type: 'spring', stiffness: 600, damping: 28 }}
-              className="flex flex-col items-center justify-center gap-[3px] py-3 flex-1 focus:outline-none"
+              onClick={() => onTabChange(tab.id as TabId)}
+              className="flex flex-col items-center justify-center gap-1 flex-1 h-full focus:outline-none tap-scale"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              {/* Icon — stays same size, only color changes */}
-              <motion.span
-                animate={{ color: isActive ? '#25d366' : 'rgba(255,255,255,0.38)' }}
-                transition={{ duration: 0.18 }}
+              {/* Pill + Icon */}
+              <motion.div
+                layout
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                className={`w-16 h-8 rounded-full flex items-center justify-center relative ${
+                  isActive ? 'bg-[#e8f7f2] dark:bg-[#0f3629]' : 'bg-transparent'
+                }`}
               >
-                {tab.icon}
-              </motion.span>
+                <div
+                  className={`z-10 transition-colors duration-200 ${
+                    isActive
+                      ? 'text-[#008069] dark:text-[#25d366]'
+                      : 'text-[#54656f] dark:text-[#8696a0]'
+                  }`}
+                >
+                  {tab.icon}
+                </div>
+              </motion.div>
 
               {/* Label */}
-              <motion.span
-                animate={{
-                  color: isActive ? '#25d366' : 'rgba(255,255,255,0.38)',
-                  fontWeight: isActive ? 700 : 400,
-                }}
-                transition={{ duration: 0.18 }}
-                className="text-[10px] tracking-wide leading-none"
+              <span
+                className={`text-[12px] leading-none transition-all duration-200 ${
+                  isActive
+                    ? 'text-gray-900 dark:text-[#e9edef] font-semibold'
+                    : 'text-[#54656f] dark:text-[#8696a0] font-medium'
+                }`}
               >
                 {tab.label}
-              </motion.span>
-
-              {/* Active indicator dot */}
-              <div className="h-[3px] flex justify-center">
-                {isActive && (
-                  <motion.div
-                    layoutId="navDot"
-                    className="w-4 h-[3px] rounded-full bg-[#25d366]"
-                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                  />
-                )}
-              </div>
-            </motion.button>
+              </span>
+            </button>
           );
         })}
       </div>

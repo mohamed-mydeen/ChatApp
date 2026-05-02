@@ -13,6 +13,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   checkAuth: () => Promise<boolean>;
   clearError: () => void;
+  updateUser: (data: Partial<any>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -61,9 +62,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       const data = await fetchAuth('/register', { username, email, password });
-      localStorage.setItem('token', data.token);
-      setToken(data.token);
-      setUser(data.user);
+      // NOTE: We intentionally do NOT setUser/setToken here.
+      // AuthScreen shows the "You're all set" screen first, then calls login() on "Enter Chat".
       return data.user;
     } finally {
       setLoading(false);
@@ -109,8 +109,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const clearError = () => setError(null);
 
+  const updateUser = (data: Partial<any>) => {
+    setUser((prev: any) => ({ ...prev, ...data }));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, checkAuth, clearError }}>
+    <AuthContext.Provider value={{ user, token, loading, error, login, register, logout, checkAuth, clearError, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

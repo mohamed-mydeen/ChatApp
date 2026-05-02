@@ -16,9 +16,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 
+// ─── Environment Check ────────────────────────────────────────────────────────
+if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
+  console.error('❌ FATAL ERROR: Missing MONGO_URI or JWT_SECRET in .env file.');
+  process.exit(1);
+}
+
 // ─── MongoDB connection ───────────────────────────────────────────────────────
 mongoose
-  .connect(process.env.MONGO_URI ?? 'mongodb://localhost:27017/realtimechat')
+  .connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB error:', err.message));
 
@@ -32,27 +38,16 @@ const io = new Server(httpServer, {
     origin: process.env.NODE_ENV === 'production' ? false : 'http://localhost:5173',
     methods: ['GET', 'POST'],
   },
+  maxHttpBufferSize: 1e8, // 100MB payload limit for images
 });
 
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
-
-// ─── Production: Serve Frontend ───────────────────────────────────────────────
-const distPath = path.resolve(__dirname, '../dist');
-console.log(`[Server] NODE_ENV: ${process.env.NODE_ENV}`);
-console.log(`[Server] Serving static files from: ${distPath}`);
-
-if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
-  app.use(express.static(distPath));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'));
-  });
-}
 
 
 // ─── In-Memory Online Users (socket routing only) ────────────────────────────
@@ -73,7 +68,7 @@ app.get('/users/online', (_req, res) => {
 
 // ─── REST: Get message history (persisted) ───────────────────────────────────
 
-app.get('/messages/:userA/:userB', protect, async (req, res) => {
+app.get('/api/messages/:userA/:userB', protect, async (req, res) => {
   try {
     const { userA, userB } = req.params;
     const messages = await Message.find({
@@ -83,14 +78,27 @@ app.get('/messages/:userA/:userB', protect, async (req, res) => {
       ],
     })
       .sort({ createdAt: 1 })
-      .limit(100);
+      .limit(200);
 
     res.json({ success: true, messages });
   } catch (err) {
-    console.error('[/messages]', err);
+    console.error('[/api/messages]', err);
     res.status(500).json({ success: false, message: 'Failed to fetch messages' });
   }
 });
+
+// ─── Production: Serve Frontend (MUST be after all API routes) ────────────────
+const distPath = path.resolve(__dirname, '../dist');
+console.log(`[Server] NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`[Server] Serving static files from: ${distPath}`);
+
+if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
+  app.use(express.static(distPath));
+  // Only serve index.html for non-API routes
+  app.get(/^(?!\/api).*$/, (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
 
 // ─── Socket.IO ───────────────────────────────────────────────────────────────
 

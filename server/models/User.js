@@ -34,6 +34,21 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    bio: {
+      type: String,
+      default: 'Hey there! I am using Feast At Night.',
+      maxlength: [139, 'Bio must be at most 139 characters'],
+    },
+    phone: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    status: {
+      type: String,
+      default: 'Available',
+      maxlength: [50, 'Status must be at most 50 characters'],
+    },
     isOnline: {
       type: Boolean,
       default: false,

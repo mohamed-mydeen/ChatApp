@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
 import SettingsPage from './components/SettingsPage';
 import StatusPage from './components/StatusPage';
 import BottomNavBar from './components/BottomNavBar';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useSocket } from './context/SocketContext';
 
 function App() {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -21,6 +22,48 @@ function App() {
     setActiveChatName(name);
   };
 
+  const { socket } = useSocket();
+
+  // ── Smart Notifications (Global) ────────────────────────────────────────
+  useEffect(() => {
+    if (!socket) return;
+    
+    try {
+      if ('Notification' in window && Notification.permission === 'default') {
+        // Safe to call, but might be blocked if not user-initiated
+        Notification.requestPermission().catch(() => {});
+      }
+    } catch (err) {
+      console.warn("Notification API error:", err);
+    }
+
+    const handleGlobalMessage = (msg: any) => {
+      // Prevent notification if we are actively viewing this chat
+      if (activeChatId === msg.chatId && document.visibilityState === 'visible') return;
+
+      try {
+        if ('Notification' in window && Notification.permission === 'granted') {
+          // Smart Notification: Shows "Sender: message content"
+          const title = msg.senderName || 'New Message';
+          const bodyText = msg.content || (msg.file ? '📎 Sent an attachment' : 'New message');
+          
+          new Notification(title, {
+            body: bodyText,
+            icon: '/vite.svg',
+            silent: false
+          });
+        }
+      } catch (err) {
+        console.warn("Could not show notification:", err);
+      }
+    };
+
+    socket.on('receiveMessage', handleGlobalMessage);
+    return () => {
+      socket.off('receiveMessage', handleGlobalMessage);
+    };
+  }, [socket, activeChatId]);
+
   return (
     <div className="h-full w-full flex overflow-hidden bg-[#e5ddd5] dark:bg-[#0a1014]">
       {/* Desktop Wrapper (Optional green header background) */}
@@ -29,7 +72,7 @@ function App() {
       {/* Main App Container */}
       <div className="relative z-10 w-full h-full md:w-[calc(100%-38px)] md:max-w-[1600px] md:h-[calc(100%-38px)] md:m-auto flex shadow-lg md:rounded-sm overflow-hidden bg-[#efeae2] dark:bg-[#111b21]">
         
-        {/* Mobile: Sidebar or Settings takes full width when no chat is active, otherwise hidden on mobile */}
+        {/* Mobile: Sidebar or Settings takes full width when no chat is active */}
         <div className={`w-full md:w-[350px] lg:w-[400px] h-full flex-shrink-0 flex flex-col bg-white dark:bg-[#111b21] border-r border-gray-200 dark:border-gray-800 relative overflow-hidden z-10 transition-all duration-[400ms] ease-[cubic-bezier(0.32,0.72,0,1)] md:!translate-x-0 md:!opacity-100 ${activeChatId ? '-translate-x-[30%] opacity-40' : 'translate-x-0 opacity-100'}`}>
           <AnimatePresence mode="wait">
             {currentTab === 'chats' ? (

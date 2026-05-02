@@ -7,6 +7,14 @@ import AuthScreen from './components/AuthScreen.tsx'
 import { AuthProvider, useAuth } from './hooks/useAuth.tsx'
 import { E2EProvider } from './context/E2EContext.tsx'
 
+// ── Apply saved theme immediately to avoid FOUC ───────────────────────────────
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+  document.documentElement.classList.add('dark');
+} else {
+  document.documentElement.classList.remove('dark');
+}
+
 function Root() {
   const { user, loading } = useAuth();
 
