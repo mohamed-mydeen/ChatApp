@@ -28,7 +28,7 @@ export default function AuthScreen({ onLoginSuccess }: { onLoginSuccess: (userId
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-[#0f172a]">
+    <div className="h-full min-h-full w-full flex items-center justify-center relative overflow-hidden bg-[#0f172a]">
       {/* ── Background Elements ───────────────────────────────────────────── */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         {/* Animated gradients */}

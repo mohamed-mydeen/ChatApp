@@ -12,7 +12,7 @@ export default function LoginScreen({ onLogin }: { onLogin: (userId: string) => 
   const [selected, setSelected] = useState<string | null>(null);
 
   return (
-    <div className="h-screen w-full flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-[#0b141a] dark:to-[#111b21]">
+    <div className="h-full min-h-full w-full flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-[#0b141a] dark:to-[#111b21]">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}

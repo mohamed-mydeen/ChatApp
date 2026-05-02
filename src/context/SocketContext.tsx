@@ -58,12 +58,14 @@ export function SocketProvider({ userId, children }: { userId: string; children:
     // ── Receive public key from a peer → derive shared secret ────────────
     newSocket.on('peerPublicKey', async ({ fromUserId, publicKey }: { fromUserId: string; publicKey: string }) => {
       console.log('[E2E] Received public key from', fromUserId);
-      await registerPeerKey(fromUserId, publicKey);
+      const isNewKey = await registerPeerKey(fromUserId, publicKey);
 
-      // Send our own key back so they can derive the shared secret too
-      const myPublicKey = await getMyPublicKey();
-      if (myPublicKey) {
-        newSocket.emit('sharePublicKey', { userId, publicKey: myPublicKey });
+      // Only send our own key back if this was a NEW key to prevent infinite loops
+      if (isNewKey) {
+        const myPublicKey = await getMyPublicKey();
+        if (myPublicKey) {
+          newSocket.emit('sharePublicKey', { userId, publicKey: myPublicKey });
+        }
       }
     });
 

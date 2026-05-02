@@ -15,8 +15,8 @@ interface E2EContextType {
   decrypt: (senderId: string, ciphertext: string, iv: string) => Promise<string>;
   /** Export our public key as Base64 (share this via the server) */
   getMyPublicKey: () => Promise<string | null>;
-  /** Register a contact's public key — derive shared secret immediately */
-  registerPeerKey: (peerId: string, publicKeyB64: string) => Promise<void>;
+  /** Register a contact's public key — returns true if it is a new key */
+  registerPeerKey: (peerId: string, publicKeyB64: string) => Promise<boolean>;
 }
 
 const E2EContext = createContext<E2EContextType | null>(null);
@@ -26,6 +26,8 @@ export function E2EProvider({ children }: { children: React.ReactNode }) {
   // Map peerId → shared AES-GCM key
   const sharedKeysRef = useRef<Map<string, CryptoKey>>(new Map());
   const [ready, setReady] = useState(false);
+
+  const peerPublicKeysRef = useRef<Map<string, string>>(new Map());
 
   // Generate our ECDH key pair once on mount
   useEffect(() => {
@@ -41,12 +43,20 @@ export function E2EProvider({ children }: { children: React.ReactNode }) {
     return exportPublicKey(keyPairRef.current.publicKey);
   };
 
-  const registerPeerKey = async (peerId: string, publicKeyB64: string): Promise<void> => {
+  const registerPeerKey = async (peerId: string, publicKeyB64: string): Promise<boolean> => {
     if (!keyPairRef.current) throw new Error('Keys not ready yet');
+    
+    // If we already have this exact key for this peer, don't re-derive
+    if (peerPublicKeysRef.current.get(peerId) === publicKeyB64) {
+      return false;
+    }
+
     const theirPublicKey = await importPublicKey(publicKeyB64);
     const shared = await deriveSharedKey(keyPairRef.current.privateKey, theirPublicKey);
+    peerPublicKeysRef.current.set(peerId, publicKeyB64);
     sharedKeysRef.current.set(peerId, shared);
     console.log(`[E2E] Shared key derived for peer ${peerId} ✅`);
+    return true;
   };
 
   const encrypt = async (receiverId: string, plaintext: string) => {

@@ -311,7 +311,7 @@ export default function InputBar({
       </AnimatePresence>
 
       {/* ── Input Row ────────────────────────────────────────────────────── */}
-      <div className="flex items-end gap-2 px-3 py-3 bg-[#f0f2f5] dark:bg-[#202c33] w-full min-h-[60px]">
+      <div className="flex items-end gap-2 px-3 pt-3 pb-[calc(12px+env(safe-area-inset-bottom,0px))] bg-[#f0f2f5] dark:bg-[#202c33] w-full min-h-[60px]">
         {/* Left buttons */}
         <div className="flex gap-1 pb-1">
           <button

@@ -22,7 +22,7 @@ function App() {
   };
 
   return (
-    <div className="h-screen w-full flex overflow-hidden bg-[#e5ddd5] dark:bg-[#0a1014]">
+    <div className="h-full w-full flex overflow-hidden bg-[#e5ddd5] dark:bg-[#0a1014]">
       {/* Desktop Wrapper (Optional green header background) */}
       <div className="absolute top-0 left-0 w-full h-[127px] bg-[#00a884] hidden md:block z-0"></div>
 
