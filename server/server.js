@@ -43,10 +43,14 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 
 // ─── Production: Serve Frontend ───────────────────────────────────────────────
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../dist')));
+const distPath = path.resolve(__dirname, '../dist');
+console.log(`[Server] NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`[Server] Serving static files from: ${distPath}`);
+
+if (process.env.NODE_ENV === 'production' || process.env.RENDER) {
+  app.use(express.static(distPath));
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../dist', 'index.html'));
+    res.sendFile(path.join(distPath, 'index.html'));
   });
 }
 
